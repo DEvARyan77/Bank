@@ -48,7 +48,9 @@ class AccountApiIntegrationTest {
         mockMvc.perform(post("/api/transfers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"fromAccount\":\"" + a + "\",\"toAccount\":\"" + b + "\",\"amount\":1500}"))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("COMPLETED"))
+                .andExpect(jsonPath("$.riskLevel").value("UNCHECKED"));
 
         mockMvc.perform(get("/api/accounts/" + a))
                 .andExpect(status().isOk())

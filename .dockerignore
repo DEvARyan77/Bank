@@ -3,3 +3,5 @@ target/
 .idea/
 .vscode/
 .env
+frontend/
+fraud-service/

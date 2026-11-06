@@ -5,7 +5,6 @@ import com.devaryan.minibank.dto.AmountRequest;
 import com.devaryan.minibank.dto.CreateAccountRequest;
 import com.devaryan.minibank.dto.PageResponse;
 import com.devaryan.minibank.dto.TransactionResponse;
-import com.devaryan.minibank.dto.TransferRequest;
 import com.devaryan.minibank.service.AccountService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -63,11 +62,5 @@ public class AccountController {
     public AccountResponse withdraw(@PathVariable String accountNumber,
                                     @Valid @RequestBody AmountRequest request) {
         return AccountResponse.from(service.withdraw(accountNumber, request.amount()));
-    }
-
-    @PostMapping("/transfers")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void transfer(@Valid @RequestBody TransferRequest request) {
-        service.transfer(request.fromAccount(), request.toAccount(), request.amount());
     }
 }

@@ -15,18 +15,36 @@ services:
       interval: 5s
       retries: 10
 
+  fraud-service:
+    build: ./fraud-service
+    container_name: minibank-fraud
+    ports:
+      - "8000:8000"
+
   app:
     build: .
     container_name: minibank-app
     depends_on:
       db:
         condition: service_healthy
+      fraud-service:
+        condition: service_started
     environment:
       DB_URL: jdbc:postgresql://db:5432/minibank
       DB_USERNAME: minibank
       DB_PASSWORD: minibank
+      FRAUD_SERVICE_URL: http://fraud-service:8000
+      CORS_ALLOWED_ORIGINS: http://localhost:5173
     ports:
       - "8080:8080"
+
+  frontend:
+    build: ./frontend
+    container_name: minibank-frontend
+    depends_on:
+      - app
+    ports:
+      - "5173:80"
 
 volumes:
   minibank-data:

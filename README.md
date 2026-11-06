@@ -6,12 +6,14 @@ A banking REST API built with **Java 21, Spring Boot and PostgreSQL**. It suppor
 
 - Create accounts with auto-generated account numbers (`MB` + 10 digits)
 - Deposit, withdraw and transfer money
+- **Transaction history** for every account, with pagination (a permanent audit trail)
+- Interactive API docs with **Swagger UI**
 - Business rules: no overdrafts, no zero or negative amounts, at most 2 decimal places, no transfers to the same account
 - **Atomic transfers**: `@Transactional` makes a transfer all-or-nothing, so money is never lost halfway
 - **Optimistic locking** (`@Version`): two requests can't overwrite the same balance at the same time
 - Money stored as `BigDecimal` / `NUMERIC(19,2)`, never `double`, to avoid rounding errors
 - Clear JSON error responses (RFC 9457 problem details) with the right HTTP status codes
-- Unit tests (JUnit 5 + Mockito) and a CI pipeline on GitHub Actions
+- Unit and integration tests (JUnit 5, Mockito, MockMvc) and a CI pipeline on GitHub Actions
 - Runs with Docker Compose
 
 ## Tech stack
@@ -19,9 +21,9 @@ A banking REST API built with **Java 21, Spring Boot and PostgreSQL**. It suppor
 | Area | Tools |
 |---|---|
 | Language | Java 21 |
-| Framework | Spring Boot (Web MVC, Data JPA, Validation, Actuator) |
+| Framework | Spring Boot (Web MVC, Data JPA, Validation, Actuator), springdoc OpenAPI |
 | Database | PostgreSQL 16 (H2 in-memory for tests) |
-| Testing | JUnit 5, Mockito |
+| Testing | JUnit 5, Mockito, MockMvc |
 | DevOps | Docker, Docker Compose, GitHub Actions |
 | Build | Maven |
 
@@ -30,6 +32,7 @@ A banking REST API built with **Java 21, Spring Boot and PostgreSQL**. It suppor
 ```
 src/main/java/com/devaryan/minibank
 ├── MinibankApplication.java     # entry point
+├── config/                      # CORS and other configuration
 ├── controller/                  # REST endpoints
 ├── service/                     # business logic and transactions
 ├── repository/                  # database access (Spring Data JPA)
@@ -59,7 +62,7 @@ Or run everything (database + app) in Docker:
 docker compose up --build
 ```
 
-Database settings can be overridden with the environment variables `DB_URL`, `DB_USERNAME` and `DB_PASSWORD`.
+Settings can be overridden with environment variables: `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` and `CORS_ALLOWED_ORIGINS`.
 
 ## Running tests
 
@@ -71,11 +74,14 @@ Tests use an in-memory H2 database, so PostgreSQL isn't needed.
 
 ## API
 
+Interactive docs: **http://localhost:8080/swagger-ui.html** (try every endpoint from the browser).
+
 | Method | Endpoint | Description |
 |---|---|---|
 | `POST` | `/api/accounts` | Create an account |
 | `GET` | `/api/accounts` | List all accounts |
 | `GET` | `/api/accounts/{accountNumber}` | Get one account |
+| `GET` | `/api/accounts/{accountNumber}/transactions?page=0&size=20` | Transaction history, newest first |
 | `POST` | `/api/accounts/{accountNumber}/deposit` | Deposit money |
 | `POST` | `/api/accounts/{accountNumber}/withdraw` | Withdraw money |
 | `POST` | `/api/transfers` | Transfer between accounts |

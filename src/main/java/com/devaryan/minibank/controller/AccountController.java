@@ -3,6 +3,8 @@ package com.devaryan.minibank.controller;
 import com.devaryan.minibank.dto.AccountResponse;
 import com.devaryan.minibank.dto.AmountRequest;
 import com.devaryan.minibank.dto.CreateAccountRequest;
+import com.devaryan.minibank.dto.PageResponse;
+import com.devaryan.minibank.dto.TransactionResponse;
 import com.devaryan.minibank.dto.TransferRequest;
 import com.devaryan.minibank.service.AccountService;
 import jakarta.validation.Valid;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,6 +44,13 @@ public class AccountController {
     @GetMapping("/accounts/{accountNumber}")
     public AccountResponse get(@PathVariable String accountNumber) {
         return AccountResponse.from(service.getAccount(accountNumber));
+    }
+
+    @GetMapping("/accounts/{accountNumber}/transactions")
+    public PageResponse<TransactionResponse> transactions(@PathVariable String accountNumber,
+                                                          @RequestParam(defaultValue = "0") int page,
+                                                          @RequestParam(defaultValue = "20") int size) {
+        return PageResponse.from(service.getTransactions(accountNumber, page, size), TransactionResponse::from);
     }
 
     @PostMapping("/accounts/{accountNumber}/deposit")

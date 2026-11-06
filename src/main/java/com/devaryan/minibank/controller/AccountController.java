@@ -1,0 +1,63 @@
+package com.devaryan.minibank.controller;
+
+import com.devaryan.minibank.dto.AccountResponse;
+import com.devaryan.minibank.dto.AmountRequest;
+import com.devaryan.minibank.dto.CreateAccountRequest;
+import com.devaryan.minibank.dto.TransferRequest;
+import com.devaryan.minibank.service.AccountService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api")
+public class AccountController {
+
+    private final AccountService service;
+
+    public AccountController(AccountService service) {
+        this.service = service;
+    }
+
+    @PostMapping("/accounts")
+    @ResponseStatus(HttpStatus.CREATED)
+    public AccountResponse create(@Valid @RequestBody CreateAccountRequest request) {
+        return AccountResponse.from(service.createAccount(request.accountHolder()));
+    }
+
+    @GetMapping("/accounts")
+    public List<AccountResponse> getAll() {
+        return service.getAllAccounts().stream().map(AccountResponse::from).toList();
+    }
+
+    @GetMapping("/accounts/{accountNumber}")
+    public AccountResponse get(@PathVariable String accountNumber) {
+        return AccountResponse.from(service.getAccount(accountNumber));
+    }
+
+    @PostMapping("/accounts/{accountNumber}/deposit")
+    public AccountResponse deposit(@PathVariable String accountNumber,
+                                   @Valid @RequestBody AmountRequest request) {
+        return AccountResponse.from(service.deposit(accountNumber, request.amount()));
+    }
+
+    @PostMapping("/accounts/{accountNumber}/withdraw")
+    public AccountResponse withdraw(@PathVariable String accountNumber,
+                                    @Valid @RequestBody AmountRequest request) {
+        return AccountResponse.from(service.withdraw(accountNumber, request.amount()));
+    }
+
+    @PostMapping("/transfers")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void transfer(@Valid @RequestBody TransferRequest request) {
+        service.transfer(request.fromAccount(), request.toAccount(), request.amount());
+    }
+}

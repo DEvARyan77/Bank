@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16
+    container_name: minibank-db
+    environment:
+      POSTGRES_DB: minibank
+      POSTGRES_USER: minibank
+      POSTGRES_PASSWORD: minibank
+    ports:
+      - "5433:5432"
+    volumes:
+      - minibank-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U minibank -d minibank"]
+      interval: 5s
+      retries: 10
+
+  app:
+    build: .
+    container_name: minibank-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/minibank
+      DB_USERNAME: minibank
+      DB_PASSWORD: minibank
+    ports:
+      - "8080:8080"
+
+volumes:
+  minibank-data:
